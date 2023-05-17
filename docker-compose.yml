@@ -12,7 +12,8 @@ services:
       options:
         tag: "conferencemapper"
     depends_on:
-      - my_sql_local
+        my_sql_local:
+           condition: service_healthy
     environment:
       DB_PASSWORD: rdv_password
       DB_USER: rdv_user
@@ -32,6 +33,10 @@ services:
       MYSQL_USER: rdv_user
       MYSQL_PASSWORD: rdv_password
       MAX_ALLOWED_PACKET: 1073741824
+    healthcheck:
+          test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+          timeout: 10s
+          retries: 10
 
 volumes:
   mysql-data:

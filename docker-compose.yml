@@ -1,0 +1,37 @@
+services:
+  confmapper_server:
+    container_name: conferencemapper
+    image: conferencemapper
+    volumes:
+      - ./config/config_sample.php:/usr/local/ConferenceMapper/src/policyserver/config/config.php
+    ports:
+      - "8081:80"
+      - "8445:443"
+    logging:
+      driver: syslog
+      options:
+        tag: "conferencemapper"
+    depends_on:
+      - my_sql_local
+    environment:
+      DB_PASSWORD: rdv_password
+      DB_USER: rdv_user
+      DB_HOST: my_sql_local
+
+  my_sql_local:
+    container_name: my_sql_local
+    image: mysql:8.0.31
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Password4rootroot
+      MYSQL_DATABASE: rendezvous
+      MYSQL_USER: rdv_user
+      MYSQL_PASSWORD: rdv_password
+      MAX_ALLOWED_PACKET: 1073741824
+
+volumes:
+  mysql-data:

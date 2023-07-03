@@ -8,7 +8,7 @@ $config['db'] = array(
     'type' => 'mysql',
     'host' => getenv("DB_HOST"),//'localhost',
     'port' => '3306',
-    'database' => 'rendezvous',
+    'database' => getenv("DB_DATABASE"),
     'username' => getenv("DB_USER"),
     'password' => getenv("DB_PASSWORD"),
     'charset' => 'utf8',
@@ -21,19 +21,19 @@ $config['memcached'] = array(
 
 $config['conf_mapper'] = array(
     'pin_digit_number' => 10,
-    'meet_domain' => "conference.rdv42.rendez-vous.renater.fr",
+    'meet_domain' => "conference.".getenv("JITSI_DOMAIN"),
     'lifetime_hours' => array(
-            'long' => 1440,
-            'short' => 6
+            'long' => getenv("LIFETIME_LONG"),
+            'short' => getenv("LIFETIME_SHORT")
         )
 );
 
 $config['phone_number_list'] = array(
-    '0978080962'
+    getenv("PHONE_NUMBER_LIST")
 );
 
 $config['jigasi_extension_list'] = array(
-    '666'
+    getenv("JIGASI_EXTANSION_LIST")
 );
 
 $config['syslog'] = array(

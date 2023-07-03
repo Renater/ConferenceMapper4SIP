@@ -16,9 +16,13 @@ if not os.getenv('DB_USER'):
     print ( "DB_HOST needed in environment")
     exit()
 
+if not os.getenv('DB_DATABASE'):
+    print ( "DB_DATABASE needed in environment")
+    exit()
+
 try:
     conn = mysql.connector.connect( host=os.getenv('DB_HOST'),
-                                    database="rendezvous",
+                                    database=os.getenv('DB_DATABASE'),
                                     user=os.getenv('DB_USER'),
                                     passwd=os.getenv('DB_PASSWORD'))
     conn.autocommit = False

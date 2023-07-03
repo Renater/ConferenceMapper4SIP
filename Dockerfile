@@ -13,10 +13,9 @@ RUN apt-get -y install curl gettext-base\
     && apt-get -y install php php-mysql php-mbstring php-gmp composer zip unzip php-zip\
     && apt-get -y install python3-mysql.connector mysql-client-core-8.0
 
-
 RUN mkdir /usr/local/ConferenceMapper
 COPY ./src /usr/local/ConferenceMapper/src
-
+COPY ./config/config.php /usr/local/ConferenceMapper/src/policyserver/config/config.php
 COPY ./src/conferenceMapper.conf /etc/apache2/sites-available/confmapper.conf
 RUN a2ensite confmapper.conf
 RUN a2enmod ssl

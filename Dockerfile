@@ -1,17 +1,12 @@
-FROM ubuntu:22.04
+FROM debian:bullseye-slim
 
-RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
-RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
-
-RUN apt update
-RUN apt-get -y install wget gnupg2  ca-certificates software-properties-common
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
-
-RUN apt-get -y install curl gettext-base\
-    && apt-get update\
+RUN apt update && apt-get -y install curl gettext-base\
     && apt-get install -y --install-recommends apache2\
-    && apt-get -y install php php-mysql php-mbstring php-gmp composer zip unzip php-zip\
-    && apt-get -y install python3-mysql.connector mysql-client-core-8.0
+    && apt-get -y install php php-mysql php-mbstring php-gmp zip unzip php-zip\
+    && apt-get -y install default-mysql-client-core
+    
+RUN apt-get -y install python3 python3-pip
+RUN pip3 install mysql-connector-python 
 
 RUN mkdir /usr/local/ConferenceMapper
 COPY ./src /usr/local/ConferenceMapper/src

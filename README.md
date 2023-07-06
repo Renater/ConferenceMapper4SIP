@@ -36,13 +36,13 @@ Return :
 
 ### Build Docker Image :
 ```
-docker image build -t conferencemapper .
+docker image build -t conferencemapper4sip .
 ```
 
 ### Docker Compose Configuration :  
 
   confmapper_server:
-    image: conferencemapper
+    image: conferencemapper4sip
     build:
         context: conferencemapper
     container_name: conferencemapper

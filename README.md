@@ -2,7 +2,7 @@
 ConferenceMapper4SIP is a web service that informations used to connect Video Conference Room Equipment and Phone to a Web conference tool.
 It is used to provied dialin informations and PIN acces code.
 
-ConferenceMapper4SIP is build to respect the Jitsi conference mapping API used by the Jitsi-Meet interface and descrbr here : [https://community.jitsi.org/t/tutorial-self-hosted-conference-mapper-api/53901].
+ConferenceMapper4SIP is build to respect the Jitsi conference mapping API used by the Jitsi-Meet interface and described here : [https://community.jitsi.org/t/tutorial-self-hosted-conference-mapper-api/53901].
 
 
 ## This project provides : 
@@ -62,6 +62,6 @@ docker image build -t conferencemapper .
       DB_HOST: rdv-db
       JITSI_DOMAIN: meet.jit.si
       PHONE_NUMBER_LIST: '0978080000'
-      JIGASI_EXTANSION_LIST: '666','555'
+      JIGASI_EXTANSION_LIST: "'666','555'"
       LIFETIME_SHORT: 6
       LIFETIME_LONG: 1440

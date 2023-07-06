@@ -18,6 +18,11 @@ services:
       DB_PASSWORD: rdv_password
       DB_USER: rdv_user
       DB_HOST: my_sql_local
+      JITSI_DOMAIN: rdv43.rendez-vous.renater.fr
+      PHONE_NUMBER_LIST: '0978080000'
+      JIGASI_EXTANSION_LIST: "'666','555'"
+      LIFETIME_SHORT: 6
+      LIFETIME_LONG: 1440
 
   my_sql_local:
     container_name: my_sql_local

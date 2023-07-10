@@ -18,6 +18,8 @@ Description : Conference mapping between conference JID and numeric
 Parameters : 
 - id  : a valid id to get the conference name mapped to ti.
 - conference : a conference name in format confname@conferenc.jitsi_domaine to get or generate a mapped id.
+
+
 Return : Json
 
 ### GET /phoneNumberList

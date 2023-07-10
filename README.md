@@ -16,21 +16,23 @@ The ConferenceMapper4SIP respects the jitsi cloud-api : https://github.com/jitsi
 Description : Conference mapping between conference JID and numeric 
 
 Parameters : 
-
-Return : 
+- id  : a valid id to get the conference name mapped to ti.
+- conference : a conference name in format confname@conferenc.jitsi_domaine to get or generate a mapped id.
+Return : Json
 
 ### GET /phoneNumberList
 Description :  Answer with Phone number list and additional information
 
-Parameters : 
+Parameters : None
 
-Return : 
+Return : Json
+
 ### GET /getDialDest
-Description : 
+Description : Used to managed multi Jigasi extention on the PBX side to use multilple Jigasi server. It return a element of the JIGASI_EXTANSION_LIST in a round robin scheduling.
 
-Parameters : 
+Parameters : None
 
-Return : 
+Return : Json 
 
 ## Docker Environnement 
 
@@ -40,7 +42,7 @@ docker image build -t conferencemapper4sip .
 ```
 
 ### Docker Compose Configuration :  
-
+```
   confmapper_server:
     image: conferencemapper4sip
     build:
@@ -56,12 +58,13 @@ docker image build -t conferencemapper4sip .
     depends_on:
       - db
     environment:
-      DB_PASSWORD: rdv_password
-      DB_USER: rdv_user
+      DB_PASSWORD: password
+      DB_USER: user
       DB_HOST: db
-      DB_HOST: rdv-db
+      DB_HOST: host_db
       JITSI_DOMAIN: meet.jit.si
       PHONE_NUMBER_LIST: '0978080000'
       JIGASI_EXTANSION_LIST: "'666','555'"
       LIFETIME_SHORT: 6
       LIFETIME_LONG: 1440
+```

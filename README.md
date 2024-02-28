@@ -43,6 +43,9 @@ Return : Json
 docker image build -t conferencemapper4sip .
 ```
 
+We also provide Docker image on DockerHub : [https://hub.docker.com/r/renater/conferencemapper4sip].
+
+
 ### Docker Compose Configuration :  
 ```
   confmapper_server:

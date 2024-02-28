@@ -63,13 +63,25 @@ We also provide Docker image on DockerHub : [https://hub.docker.com/r/renater/co
     depends_on:
       - db
     environment:
-      DB_PASSWORD: password
+      DB_PASSWORD: XXXXXXXXX
       DB_USER: user
-      DB_HOST: db
       DB_HOST: host_db
+      DB_DATABASE: conf_db
       JITSI_DOMAIN: meet.jit.si
       PHONE_NUMBER_LIST: '0978080000'
       JIGASI_EXTANSION_LIST: "'666','555'"
       LIFETIME_SHORT: 6
       LIFETIME_LONG: 1440
+
+  db:
+    container_name: db
+    image: mysql
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      MYSQL_HOST=db
+      MYSQL_ROOT_PASSWORD=YYYYYYYYY
+      MYSQL_DATABASE=conf_db
+      MYSQL_USER=user
+      MYSQL_PASSWORD=XXXXXXXXX
 ```

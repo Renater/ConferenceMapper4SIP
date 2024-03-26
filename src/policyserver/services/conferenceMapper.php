@@ -24,11 +24,21 @@ try {
     header('Content-Type: application/json');
     header("Access-Control-Allow-Origin: *");
     
+
     /***  Conference Mapper ***/
     $roomNumReq = key_exists('id', $_GET) ? $_GET['id'] : null;
     $roomNameReq = key_exists('conference', $_GET) ? $_GET['conference'] : null;
-    $longTerm = filter_input(INPUT_GET, 'prefix',  FILTER_VALIDATE_BOOLEAN,
+
+    $mail = key_exists('mail', $_GET) ? $_GET['mail'] : null;
+
+    $longTerm = filter_input(INPUT_GET, 'suffix',  FILTER_VALIDATE_BOOLEAN,
                                   array( 'options' => array('default'=> 0) ));
+
+
+    /*** Log request ****/
+    error_log("Request NUM:$roomNumReq NAME:$roomNameReq LT:$longTerm MAIL:$mail");
+
+
     if ($roomNumReq || $roomNameReq) {
 
         http_response_code(200);
@@ -82,7 +92,7 @@ try {
         if (!$roomNum) {
             /* This conference name does not exist in DB */
             if (!$conferenceDb) {
-                $roomNum = $myDB->setRoom($roomName, $longTerm);
+                $roomNum = $myDB->setRoom($roomName, $longTerm, $mail);
             }
             /* Maybe the conference insertion in DB is not finalized (due to others calls...) */
             elseif( !isset($conferenceDb['room_number']) ) {
@@ -90,6 +100,9 @@ try {
             }
             else {
                 $roomNum = $conferenceDb['room_number'];
+                // Update conference attribute if changed
+                if ( ( isset($mail) && $conferenceDb['mail_owner']!= $mail ) || $conferenceDb['long_term']!=$longTerm )
+                    $myDB->updateRoom($roomName,$longTerm,$mail);
             }
 
             if( !$roomNum ) {

@@ -135,17 +135,18 @@ class CustomDBI {
      * @return string
      * @throws Exception
      */
-    public function setRoom($roomName, $longTerm): ?string
+    public function setRoom($roomName, $longTerm, $mail): ?string
     {
 
         $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-        $sql = "INSERT INTO rooms (room_name,creation_time,long_term) 
-                VALUES (:in_name,:in_time,:long_term)";
+        $sql = "INSERT INTO rooms (room_name,creation_time,long_term,mail_owner) 
+                VALUES (:in_name,:in_time,:long_term,:in_mail)";
 
         $params = array(
             array('name' => 'in_name',   'value' => $roomName, 'type' => PDO::PARAM_STR),
             array('name' => 'in_time',   'value' => $dateNow->format('Y-m-d H:i:s'), 'type' => PDO::PARAM_STR),
             array('name' => 'long_term', 'value' => $longTerm, 'type' => PDO::PARAM_BOOL),
+            array('name' => 'in_mail',   'value' => $mail, 'type' => PDO::PARAM_STR),
         );
 
         if(!CustomDBI::request($sql, $params)) {
@@ -156,6 +157,31 @@ class CustomDBI {
 
     }
 
+    /**
+     * Update the value longTerm and mail_owner of the last entry roomName in room table
+     *
+     * @param $roomName
+     * @param $longTerm
+     * @param $mail
+     * @return Boolean
+     * @throws Exception
+     */
+    public function updateRoom($roomName, $longTerm, $mail): ?bool
+    {
+        $sql = 'UPDATE rooms
+        SET mail_owner= :in_mail, 
+            long_term= :long_term
+        WHERE room_name = :in_name
+        ORDER BY creation_time DESC
+        LIMIT 1' ; 
+
+        $params = array(
+            array('name' => 'in_name', 'value' => $roomName, 'type' => PDO::PARAM_STR),
+            array('name' => 'long_term', 'value' => $longTerm, 'type' => PDO::PARAM_BOOL),
+            array('name' => 'in_mail',   'value' => $mail, 'type' => PDO::PARAM_STR),
+        );
+        return CustomDBI::request($sql, $params);
+    }
 
     /**
      * Retrieve room from database
@@ -191,7 +217,7 @@ class CustomDBI {
             }
         }
 
-        $sql = 'SELECT db_id,room_name,room_number,room_pin,meet_instance,creation_time,long_term
+        $sql = 'SELECT db_id,room_name,room_number,room_pin,meet_instance,creation_time,long_term,mail_owner
         FROM rooms
         WHERE   room_number = :in_num OR room_name = :in_name
             AND (((DATE_ADD(creation_time, INTERVAL :long_tl HOUR) > :in_time) AND long_term = 1)

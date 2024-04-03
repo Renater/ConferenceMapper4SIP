@@ -19,15 +19,10 @@ try {
         openlog($config['syslog']['identifier'], LOG_PID, LOG_LOCAL0);
     }
 
-    /*** init header ***/
-    header_remove();
-    header('Content-Type: application/json');
-    header("Access-Control-Allow-Origin: *");
-
     $randKey = array_rand($config['jigasi_extension_list'], 1);
     $response['jigasi_ext'] = $config['jigasi_extension_list'][$randKey];
 
-    $jsonResp = json_encode($response);
+    RestResponse::send($jsonResp);
 
     echo $jsonResp;
 
@@ -35,5 +30,6 @@ try {
 
 } catch (Exception $e){
     error_log($e->getMessage());
+    RestResponse::send($e->getMessage(), 500);
     return;
 }

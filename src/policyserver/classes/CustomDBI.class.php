@@ -101,11 +101,11 @@ class CustomDBI {
      * @return string
      * @throws Exception
      */
-    public function setRoomNumber($roomName): ?string
+    public function setRoomNumber($roomName,$domain): ?string
     {
 
         global $config;
-        $room = CustomDBI::getRoom($roomName, null, null);
+        $room = CustomDBI::getMapping($roomName, null, $domain);
         if (!$room) {
             return null;
         }
@@ -135,17 +135,18 @@ class CustomDBI {
      * @return string
      * @throws Exception
      */
-    public function setRoom($roomName, $longTerm, $mail): ?string
+    public function setMapping($roomName, $domain, $longTerm, $mail): ?string
     {
 
         $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-        $sql = "INSERT INTO rooms (room_name,creation_time,long_term,mail_owner) 
-                VALUES (:in_name,:in_time,:long_term,:in_mail)";
+        $sql = "INSERT INTO rooms (room_name,creation_time,long_term,mail_owner,meet_instance) 
+                VALUES (:in_name,:in_time,:long_term,:in_mail,:in_domain)";
 
         $params = array(
             array('name' => 'in_name',   'value' => $roomName, 'type' => PDO::PARAM_STR),
             array('name' => 'in_time',   'value' => $dateNow->format('Y-m-d H:i:s'), 'type' => PDO::PARAM_STR),
             array('name' => 'long_term', 'value' => $longTerm, 'type' => PDO::PARAM_BOOL),
+            array('name' => 'in_domain', 'value' => $domain, 'type' => PDO::PARAM_STR),
             array('name' => 'in_mail',   'value' => $mail, 'type' => PDO::PARAM_STR),
         );
 
@@ -153,7 +154,7 @@ class CustomDBI {
             return null;
         }
 
-        return CustomDBI::setRoomNumber($roomName);
+        return CustomDBI::setRoomNumber($roomName, $domain);
 
     }
 
@@ -166,7 +167,7 @@ class CustomDBI {
      * @return Boolean
      * @throws Exception
      */
-    public function updateRoom($roomName, $longTerm, $mail): ?bool
+    public function updateMapping($roomName, $longTerm, $mail): ?bool
     {
         $sql = 'UPDATE rooms
         SET mail_owner= :in_mail, 
@@ -188,38 +189,19 @@ class CustomDBI {
      *
      * @param $roomName
      * @param $roomNum
-     * @param $cache
+     * @param $domain
      * @return array
      * @throws Exception
      */
-    public function getRoom($roomName, $roomNum, $cache): ?array
+    public function getMapping($roomName, $roomNum, $domain): ?array
     {
 
         global $config;
         $dateNow = new DateTime("now", new DateTimeZone('UTC'));
 
-        if ($cache) {
-            $room = false;
-            if (isset($roomNum)) {
-                $room = $cache->get($roomNum, null);
-            }
-            elseif (isset($roomName)) {
-                $room = $cache->get(CustomDBI::getKeyFromName($roomName), null);
-            }
-            if ($room !== false) {
-                /** Check lifetime **/
-                $lifetime = $room['long_term'] ? $config['conf_mapper']['lifetime']['long']:
-                                                 $config['conf_mapper']['lifetime']['short'];
-                $dateEnd = new DateTime($room['creation_time'], new DateTimeZone('UTC'));
-                if ($dateEnd->modify('+'.$lifetime.' hours') > $dateNow) {
-                    return $room;
-                }
-            }
-        }
-
         $sql = 'SELECT db_id,room_name,room_number,room_pin,meet_instance,creation_time,long_term,mail_owner
         FROM rooms
-        WHERE   room_number = :in_num OR room_name = :in_name
+        WHERE    (room_number = :in_num OR (room_name = :in_name AND meet_instance = :in_domain) )
             AND (((DATE_ADD(creation_time, INTERVAL :long_tl HOUR) > :in_time) AND long_term = 1)
                  OR ((DATE_ADD(creation_time, INTERVAL :short_tl HOUR) > :in_time) AND long_term = 0))
         ORDER BY creation_time DESC';
@@ -227,6 +209,7 @@ class CustomDBI {
         $params = array(
             array('name' => 'in_num', 'value' => $roomNum, 'type' => PDO::PARAM_STR),
             array('name' => 'in_name', 'value' => $roomName, 'type' => PDO::PARAM_STR),
+            array('name' => 'in_domain', 'value' => $domain, 'type' => PDO::PARAM_STR),
             array('name' => 'in_time', 'value' => $dateNow->format('Y-m-d H:i:s'), 'type' => PDO::PARAM_STR),
             array('name' => 'short_tl', 'value' => $config['conf_mapper']['lifetime_hours']['short'],
                   'type' => PDO::PARAM_INT),
@@ -240,10 +223,6 @@ class CustomDBI {
         }
 
         if (is_array($room) && count($room)) {
-            if ($cache) {
-                $cache->add($roomNum, $room[0], $config['memcached']['time_to_leave']);
-                $cache->add(CustomDBI::getKeyFromName($roomName), $room[0], $config['memcached']['time_to_leave']);
-            }
             return $room[0];
         }
         else {

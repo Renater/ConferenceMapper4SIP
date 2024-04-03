@@ -19,11 +19,6 @@ try {
         openlog($config['syslog']['identifier'], LOG_PID, LOG_LOCAL0);
     }
 
-    /*** init header ***/
-    header_remove();
-    header('Content-Type: application/json');
-    header("Access-Control-Allow-Origin: *");
-
     $response['message'] = "Phone numbers available.";
     $response['numbers']["FR"] = $config['phone_number_list'];
     $response['numbers']["Other"] = ["more"];
@@ -31,11 +26,12 @@ try {
 
     $jsonResp = json_encode($response);
 
-    echo $jsonResp;
+    RestResponse::send($jsonResp);
 
     return;
 
 } catch (Exception $e){
     error_log($e->getMessage());
+    RestResponse::send($e->getMessage(), 500);
     return;
 }

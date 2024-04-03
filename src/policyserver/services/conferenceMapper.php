@@ -19,11 +19,6 @@ try {
         openlog($config['syslog']['identifier'], LOG_PID, LOG_LOCAL0);
     }
     
-    /*** init header ***/
-    header_remove();
-    header('Content-Type: application/json');
-    header("Access-Control-Allow-Origin: *");
-    
 
     /***  Conference Mapper ***/
     $roomNumReq = key_exists('id', $_GET) ? $_GET['id'] : null;
@@ -41,46 +36,42 @@ try {
 
     if ($roomNumReq || $roomNameReq) {
 
-        http_response_code(200);
-
         /** get room number/name **/
         preg_match_all('/(\w+:)?([^@]+)(@.*)?/', $roomNumReq, $roomNumReq);
         preg_match_all('/(\w+:)?([^@]+)(@.*)?/', $roomNameReq, $roomNameReq);
         $roomNum = $roomNumReq[2][0];
-        $roomName = $roomNameReq[2][0];
-        $roomDomain = substr($roomNameReq[3][0],1);
+        $roomName = null;
+        $roomDomain = null;
+        if (!empty($roomNameReq[2])) {
+            $roomName = $roomNameReq[2][0];
+        }
+        if (!empty($roomNameReq[3])) {
+            $roomDomain = substr($roomNameReq[3][0], 1);
+        }
 
-        if ($roomName && $roomDomain!=$config['conf_mapper']['meet_domain']) {
-            $response['error'] = "Expected domain is @".$config['conf_mapper']['meet_domain'];
-            echo json_encode($response);
-
+        if (!is_null($roomName) && !in_array($roomDomain, $config['conf_mapper']['meet_domain'])) {
+            error_log($config['conf_mapper']);
+            $response['error'] = "Expected domain is: ".implode(' or ',$config['conf_mapper']['meet_domain']);
+            RestResponse::send($response, 400, [] );
             return;
         }
         
-        /** configure cache **/
-        $cache = NULL;
-        if ($config['memcached']['enabled'] && class_exists('Memcached')) {
-            $cache = new Memcached();
-            $cache->setOption(Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
-            foreach ($config['memcached']['servers'] as $server) {
-                $cacheTmp = new Memcached();
-                $cacheTmp->addServer($server['host'], $server['port']);
-                if ($cacheTmp->getStats()) {
-                    $cache->addServer($server['host'], $server['port']);
-                }
-            }
-        }
         $response = array();
         $myDB = new CustomDBI();
-        /** search conference **/
-        $conferenceDb = $myDB->getRoom($roomName, $roomNum, $cache);
+
+        /** look for a valid mapping **/
+        $meetInstance = $roomDomain?explode('.', $roomDomain, 2)[1]:null;
+        $mappingDb = $myDB->getMapping($roomName, $roomNum, $meetInstance);
+
 
         /* Conference name requested for a given number */
         if (!$roomName) {
-            if ($conferenceDb && $conferenceDb['room_name']) {
+            if ($mappingDb && $mappingDb['room_name']) {
                 $response['message'] = "Successfully retrieved conference mapping";
                 $response['id'] = $roomNum;
-                $response['conference'] = $conferenceDb['room_name'];
+                $roomDomain = 'conference.'.$mappingDb['meet_instance'];
+                $response['conference'] = $mappingDb['room_name'].'@'.$roomDomain;
+                $response['mail_owner'] = $mappingDb['mail_owner'];
             }
             else {
                 /*  The provided number is not valid  */
@@ -91,18 +82,20 @@ try {
         /*  Conference number requested for a given name */
         if (!$roomNum) {
             /* This conference name does not exist in DB */
-            if (!$conferenceDb) {
-                $roomNum = $myDB->setRoom($roomName, $longTerm, $mail);
+            if (!$mappingDb) {
+                $meetInstance = explode('.', $roomDomain, 2)[1];
+                $roomNum = $myDB->setMapping($roomName, $meetInstance, $longTerm, $mail);
+                $mappingDb['mail_owner']=$mail;
             }
             /* Maybe the conference insertion in DB is not finalized (due to others calls...) */
-            elseif( !isset($conferenceDb['room_number']) ) {
-                $roomNum = $myDB->setRoomNUmber($roomName);
+            elseif( !isset($mappingDb['room_number']) ) {
+                $roomNum = $myDB->setRoomNUmber($roomName,$roomDomain);
             }
             else {
-                $roomNum = $conferenceDb['room_number'];
+                $roomNum = $mappingDb['room_number'];
                 // Update conference attribute if changed
-                if ( ( isset($mail) && $conferenceDb['mail_owner']!= $mail ) || $conferenceDb['long_term']!=$longTerm )
-                    $myDB->updateRoom($roomName,$longTerm,$mail);
+                if ( ( isset($mail) && $mappingDb['mail_owner']!= $mail ) || $mappingDb['long_term']!=$longTerm )
+                    $myDB->updateMapping($roomName,$longTerm,$mail);
             }
 
             if( !$roomNum ) {
@@ -111,7 +104,8 @@ try {
             else {
                 $response['message'] = "Successfully retrieved conference mapping";
                 $response['id'] = $roomNum;
-                $response['conference'] = $roomName.'@'.$config['conf_mapper']['meet_domain'];
+                $response['conference'] = $roomName.'@'.$roomDomain;
+                $response['mail_owner'] = $mappingDb['mail_owner'];
             }
         }
 
@@ -121,7 +115,7 @@ try {
             syslog(LOG_DEBUG, 'error: ' . json_encode($_GET));
             syslog(LOG_DEBUG, 'error: ' . $jsonResp);
         }
-        echo  $jsonResp;
+        RestResponse::send($jsonResp);
 
         return;
     }
@@ -129,6 +123,7 @@ try {
     return;
     
 } catch (Exception $e){
+    RestResponse::send($e->getMessage(), 500);
     error_log($e->getMessage());
     return;
 }

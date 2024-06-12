@@ -21,9 +21,6 @@ $config['memcached'] = array(
 
 $domains = explode(',',getenv("JITSI_DOMAIN"));
 
-for ($i=0; $i< sizeof($domains) ; $i++ )
-    $domains[$i]="conference.".$domains[$i];
-
 $config['conf_mapper'] = array(
     'pin_digit_number' => 10,
     'meet_domain' => $domains,    

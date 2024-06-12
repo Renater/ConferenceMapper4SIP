@@ -39,9 +39,13 @@ try {
         /** get room number/name **/
         preg_match_all('/(\w+:)?([^@]+)(@.*)?/', $roomNumReq, $roomNumReq);
         preg_match_all('/(\w+:)?([^@]+)(@.*)?/', $roomNameReq, $roomNameReq);
-        $roomNum = $roomNumReq[2][0];
+        $roomNum = null;
         $roomName = null;
         $roomDomain = null;
+
+        if (!empty($roomNumReq[2])) {
+            $roomNum = $roomNumReq[2][0];
+        }
         if (!empty($roomNameReq[2])) {
             $roomName = $roomNameReq[2][0];
         }
@@ -49,8 +53,15 @@ try {
             $roomDomain = substr($roomNameReq[3][0], 1);
         }
 
-        if (!is_null($roomName) && !in_array($roomDomain, $config['conf_mapper']['meet_domain'])) {
-            error_log($config['conf_mapper']);
+        // look for tenant presence in request
+        $tenant = Utils::extractTenant($roomNameReq[0][0],$config['conf_mapper']['meet_domain']);
+        error_log("Tenant $tenant");
+
+        if (!empty($tenant)){
+            $roomName=$tenant.'/'.$roomName;
+        }
+
+        if (!is_null($roomName) && !Utils::isValidDomain($roomDomain, $config['conf_mapper']['meet_domain'])) {
             $response['error'] = "Expected domain is: ".implode(' or ',$config['conf_mapper']['meet_domain']);
             RestResponse::send($response, 400, [] );
             return;
@@ -93,9 +104,9 @@ try {
             }
             else {
                 $roomNum = $mappingDb['room_number'];
-                // Update conference attribute if changed
-                if ( ( isset($mail) && $mappingDb['mail_owner']!= $mail ) || $mappingDb['long_term']!=$longTerm )
-                    $myDB->updateMapping($roomName,$longTerm,$mail);
+                // Update conference mail attribute if changed
+                if ( ( isset($mail) && $mappingDb['mail_owner']!= $mail )  )
+                    $myDB->updateMapping($roomName,$mail);
             }
 
             if( !$roomNum ) {

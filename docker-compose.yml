@@ -2,8 +2,6 @@ services:
   confmapper_server:
     container_name: conferencemapper
     image: conferencemapper
-    volumes:
-      - ./config/config_sample.php:/usr/local/ConferenceMapper/src/policyserver/config/config.php
     ports:
       - "8081:80"
       - "8445:443"
@@ -18,7 +16,8 @@ services:
       DB_PASSWORD: rdv_password
       DB_USER: rdv_user
       DB_HOST: my_sql_local
-      JITSI_DOMAIN: rdv43.rendez-vous.renater.fr
+      DB_DATABASE: rendezvous
+      JITSI_DOMAIN: 'rdv43.rendez-vous.renater.fr'
       PHONE_NUMBER_LIST: '0978080000'
       JIGASI_EXTANSION_LIST: "'666','555'"
       LIFETIME_SHORT: 6
@@ -40,7 +39,7 @@ services:
       MAX_ALLOWED_PACKET: 1073741824
     healthcheck:
           test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-          timeout: 10s
+          timeout: 5s
           retries: 10
 
 volumes:

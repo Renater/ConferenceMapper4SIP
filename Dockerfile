@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN apt update && apt-get -y install curl gettext-base\
     && apt-get install -y --install-recommends apache2\
@@ -6,7 +6,7 @@ RUN apt update && apt-get -y install curl gettext-base\
     && apt-get -y install default-mysql-client-core
     
 RUN apt-get -y install python3 python3-pip
-RUN pip3 install mysql-connector-python 
+RUN pip3 install mysql-connector-python --break-system-packages
 
 RUN mkdir /usr/local/ConferenceMapper
 COPY ./src /usr/local/ConferenceMapper/src

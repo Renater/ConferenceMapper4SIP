@@ -167,18 +167,16 @@ class CustomDBI {
      * @return Boolean
      * @throws Exception
      */
-    public function updateMapping($roomName, $longTerm, $mail): ?bool
+    public function updateMapping($roomName, $mail): ?bool
     {
         $sql = 'UPDATE rooms
-        SET mail_owner= :in_mail, 
-            long_term= :long_term
+        SET mail_owner= :in_mail
         WHERE room_name = :in_name
         ORDER BY creation_time DESC
         LIMIT 1' ; 
 
         $params = array(
             array('name' => 'in_name', 'value' => $roomName, 'type' => PDO::PARAM_STR),
-            array('name' => 'long_term', 'value' => $longTerm, 'type' => PDO::PARAM_BOOL),
             array('name' => 'in_mail',   'value' => $mail, 'type' => PDO::PARAM_STR),
         );
         return CustomDBI::request($sql, $params);

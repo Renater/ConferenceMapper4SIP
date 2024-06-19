@@ -4,8 +4,8 @@
 require_once('../config/config.php');
 
 spl_autoload_register(function($class) {
-    if (file_exists('../classes/'.$class.'.class.php'))
-        require_once('../classes/'.$class.'.class.php');
+    if (file_exists('../classes/'.$class.'.php'))
+        require_once('../classes/'.$class.'.php');
 });
 
 /**
@@ -55,9 +55,10 @@ try {
 
         // look for tenant presence in request
         $tenant = Utils::extractTenant($roomNameReq[0][0],$config['conf_mapper']['meet_domain']);
-        error_log("Tenant $tenant");
+        error_log("Tenant $tenant $roomName $roomDomain");
 
-        if (!empty($tenant)){
+        // Copy tenant information from domain to Roomname
+        if (!empty($tenant) && (Utils::getTenantFromRoom($roomName)=="") ){
             $roomName=$tenant.'/'.$roomName;
         }
 
@@ -71,7 +72,8 @@ try {
         $myDB = new CustomDBI();
 
         /** look for a valid mapping **/
-        $meetInstance = $roomDomain?explode('.', $roomDomain, 2)[1]:null;
+        $meetInstance = Utils::extractMeetingInstance($roomDomain, $config['conf_mapper']['meet_domain']);
+        
         $mappingDb = $myDB->getMapping($roomName, $roomNum, $meetInstance);
 
 
@@ -80,8 +82,9 @@ try {
             if ($mappingDb && $mappingDb['room_name']) {
                 $response['message'] = "Successfully retrieved conference mapping";
                 $response['id'] = $roomNum;
-                $roomDomain = 'conference.'.$mappingDb['meet_instance'];
-                $response['conference'] = $mappingDb['room_name'].'@'.$roomDomain;
+                $meetInstance = $mappingDb['meet_instance'];
+                $response['conference'] = Utils::formatIntoJid($mappingDb['room_name'],$meetInstance);
+                $response['url'] = $mappingDb['room_name'];
                 $response['mail_owner'] = $mappingDb['mail_owner'];
             }
             else {
@@ -94,13 +97,12 @@ try {
         if (!$roomNum) {
             /* This conference name does not exist in DB */
             if (!$mappingDb) {
-                $meetInstance = explode('.', $roomDomain, 2)[1];
                 $roomNum = $myDB->setMapping($roomName, $meetInstance, $longTerm, $mail);
                 $mappingDb['mail_owner']=$mail;
             }
             /* Maybe the conference insertion in DB is not finalized (due to others calls...) */
             elseif( !isset($mappingDb['room_number']) ) {
-                $roomNum = $myDB->setRoomNUmber($roomName,$roomDomain);
+                $roomNum = $myDB->setRoomNUmber($roomName,$meetInstance);
             }
             else {
                 $roomNum = $mappingDb['room_number'];
@@ -115,7 +117,8 @@ try {
             else {
                 $response['message'] = "Successfully retrieved conference mapping";
                 $response['id'] = $roomNum;
-                $response['conference'] = $roomName.'@'.$roomDomain;
+                $response['conference'] = Utils::formatIntoJid($roomName,$meetInstance);
+                $response['url'] = $roomName;
                 $response['mail_owner'] = $mappingDb['mail_owner'];
             }
         }

@@ -24,7 +24,6 @@ $domains = explode(',',getenv("JITSI_DOMAIN"));
 $config['conf_mapper'] = array(
     'pin_digit_number' => 10,
     'meet_domain' => $domains,    
-    "conference.".getenv("JITSI_DOMAIN"),
     'lifetime_hours' => array(
             'long' => getenv("LIFETIME_LONG"),
             'short' => getenv("LIFETIME_SHORT")

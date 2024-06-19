@@ -8,10 +8,10 @@ RUN apt update && apt-get -y install curl gettext-base\
 RUN apt-get -y install python3 python3-pip
 RUN pip3 install mysql-connector-python --break-system-packages
 
-RUN mkdir /usr/local/ConferenceMapper
-COPY ./src /usr/local/ConferenceMapper/src
-COPY ./config/config.php /usr/local/ConferenceMapper/src/policyserver/config/config.php
-COPY ./src/conferenceMapper.conf /etc/apache2/sites-available/confmapper.conf
+RUN mkdir /ConferenceMapper
+COPY ./src /ConferenceMapper/src
+COPY ./config/config.php /ConferenceMapper/src/config/config.php
+COPY ./config/conferenceMapper.conf /etc/apache2/sites-available/confmapper.conf
 RUN a2ensite confmapper.conf
 RUN a2enmod ssl
 

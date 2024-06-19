@@ -1,7 +1,7 @@
 services:
   confmapper_server:
     container_name: conferencemapper
-    image: conferencemapper
+    image: conferencemapper4sip
     ports:
       - "8081:80"
       - "8445:443"

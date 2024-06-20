@@ -85,6 +85,7 @@ try {
                 $meetInstance = $mappingDb['meet_instance'];
                 $response['conference'] = Utils::formatIntoJid($mappingDb['room_name'],$meetInstance);
                 $response['url'] = $mappingDb['room_name'];
+                $response['meeting_instance'] = $meetInstance;
                 $response['mail_owner'] = $mappingDb['mail_owner'];
             }
             else {
@@ -119,6 +120,7 @@ try {
                 $response['id'] = $roomNum;
                 $response['conference'] = Utils::formatIntoJid($roomName,$meetInstance);
                 $response['url'] = $roomName;
+                $response['meeting_instance'] = $meetInstance;
                 $response['mail_owner'] = $mappingDb['mail_owner'];
             }
         }

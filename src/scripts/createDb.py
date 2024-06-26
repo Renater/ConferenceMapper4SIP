@@ -27,7 +27,7 @@ try:
                                     passwd=os.getenv('DB_PASSWORD'))
     conn.autocommit = False
     cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS rooms(
+    cursor.execute('''CREATE TABLE IF NOT EXISTS conference_mapping(
                             db_id BIGINT(20) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
                             room_name VARCHAR(255) NOT NULL,
                             room_number VARCHAR(255) NULL,

@@ -110,7 +110,7 @@ class CustomDBI {
             return null;
         }
         $roomNum = CustomDBI::encodeNumberForNDigits($room['db_id'], $config['conf_mapper']['pin_digit_number']);
-        $sql = "UPDATE rooms
+        $sql = "UPDATE conference_mapping
         SET room_number= :in_num
         WHERE db_id= :id";
         $params = array(
@@ -139,7 +139,7 @@ class CustomDBI {
     {
 
         $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-        $sql = "INSERT INTO rooms (room_name,creation_time,long_term,mail_owner,meet_instance) 
+        $sql = "INSERT INTO conference_mapping (room_name,creation_time,long_term,mail_owner,meet_instance) 
                 VALUES (:in_name,:in_time,:long_term,:in_mail,:in_domain)";
 
         $params = array(
@@ -169,7 +169,7 @@ class CustomDBI {
      */
     public function updateMapping($roomName, $mail): ?bool
     {
-        $sql = 'UPDATE rooms
+        $sql = 'UPDATE conference_mapping
         SET mail_owner= :in_mail
         WHERE room_name = :in_name
         ORDER BY creation_time DESC
@@ -198,7 +198,7 @@ class CustomDBI {
         $dateNow = new DateTime("now", new DateTimeZone('UTC'));
 
         $sql = 'SELECT db_id,room_name,room_number,room_pin,meet_instance,creation_time,long_term,mail_owner
-        FROM rooms
+        FROM conference_mapping
         WHERE    (room_number = :in_num OR (room_name = :in_name AND meet_instance = :in_domain) )
             AND (((DATE_ADD(creation_time, INTERVAL :long_tl HOUR) > :in_time) AND long_term = 1)
                  OR ((DATE_ADD(creation_time, INTERVAL :short_tl HOUR) > :in_time) AND long_term = 0))

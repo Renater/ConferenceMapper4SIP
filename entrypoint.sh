@@ -12,7 +12,7 @@ then
 fi
 
 # Init local DataBase
-python3 /usr/local/ConferenceMapper/src/policyserver/scripts/createDb.py
+python3 /ConferenceMapper/src/scripts/createDb.py
 
 #Start Apache
 /usr/sbin/apache2ctl -DFOREGROUND

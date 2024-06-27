@@ -22,6 +22,8 @@ try {
     $randKey = array_rand($config['jigasi_extension_list'], 1);
     $response['jigasi_ext'] = $config['jigasi_extension_list'][$randKey];
 
+    $jsonResp = json_encode($response);
+
     RestResponse::send($jsonResp);
 
     echo $jsonResp;

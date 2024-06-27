@@ -25,9 +25,6 @@ try {
     $jsonResp = json_encode($response);
 
     RestResponse::send($jsonResp);
-
-    echo $jsonResp;
-
     return;
 
 } catch (Exception $e){

@@ -30,13 +30,14 @@ $config['conf_mapper'] = array(
         )
 );
 
-$config['phone_number_list'] = array(
-    getenv("PHONE_NUMBER_LIST")
-);
+$numberList = explode(',',getenv("NUMBER_LIST"));
+$config['number_list'] = $numberList ;
 
-$config['jigasi_extension_list'] = array(
-    getenv("JIGASI_EXTANSION_LIST")
-);
+$numberLabel = explode(',',getenv("NUMBER_LABEL_LIST"));
+$config['number_label'] = $numberLabel ;
+
+$extensionList = explode(',',getenv("JIGASI_EXTANSION_LIST"));
+$config['jigasi_extension_list'] = $extensionList;
 
 $config['syslog'] = array(
     'enabled' => false,

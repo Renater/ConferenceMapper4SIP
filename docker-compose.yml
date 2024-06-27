@@ -18,7 +18,8 @@ services:
       DB_HOST: my_sql_local
       DB_DATABASE: rendezvous
       JITSI_DOMAIN: 'rdv43.rendez-vous.renater.fr'
-      PHONE_NUMBER_LIST: '0978080000'
+      NUMBER_LIST: "0978080000,blabla@sip.com"
+      NUMBER_LABEL_LIST: "FR,SipMediaGW"
       JIGASI_EXTANSION_LIST: "'666','555'"
       LIFETIME_SHORT: 6
       LIFETIME_LONG: 1440

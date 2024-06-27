@@ -20,10 +20,14 @@ try {
     }
 
     $response['message'] = "Phone numbers available.";
-    $response['numbers']["FR"] = $config['phone_number_list'];
-    $response['numbers']["Other"] = ["more"];
-    $response['numbersEnabled'] = true;
 
+    $numbers = $config['number_list'];
+    $numbersLabel = $config['number_label'];
+    for ($i=0;$i<sizeof($numbers);$i++){
+        $response['numbers'][$numbersLabel[$i]] = $numbers[$i];    
+    }
+   
+    $response['numbersEnabled'] = true;
     $jsonResp = json_encode($response);
 
     RestResponse::send($jsonResp);

@@ -24,7 +24,7 @@ try {
     $numbers = $config['number_list'];
     $numbersLabel = $config['number_label'];
     for ($i=0;$i<sizeof($numbers);$i++){
-        $response['numbers'][$numbersLabel[$i]] = $numbers[$i];    
+        $response['numbers'][$numbersLabel[$i]] = [$numbers[$i]];    
     }
    
     $response['numbersEnabled'] = true;
